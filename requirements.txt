@@ -1,0 +1,9 @@
+echo "
+pandas>=1.5
+scikit-learn>=1.4
+mlflow>=2.12
+fastapi>=0.111
+uvicorn[standard]>=0.29
+evidently>=0.5
+joblib>=1.4
+"
