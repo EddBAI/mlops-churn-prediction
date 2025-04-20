@@ -20,4 +20,6 @@ jobs:
           pip install pytest
 
       - name: Run (placeholder) tests
-        run: pytest || echo "Ainda sem testes"
+        run: pytest
+        continue-on-error: true
+
