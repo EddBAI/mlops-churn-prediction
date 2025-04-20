@@ -7,7 +7,7 @@ mlflow>=2.12,<3.0
 # API de inferência
 fastapi>=0.111,<0.120
 uvicorn[standard]>=0.29,<0.30
-pydantic<3            # compat. com FastAPI 0.11x
+pydantic<3
 
 # Monitoramento
 evidently>=0.5,<0.6
