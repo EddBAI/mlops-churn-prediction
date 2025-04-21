@@ -14,6 +14,10 @@ evidently>=0.5,<0.6
 
 # Utilidades
 joblib>=1.4,<2.0
+fastapi>=0.111,<0.120
+uvicorn[standard]>=0.29,<0.30
+pydantic<3          # (compatível com FastAPI 0.11x)
+python-multipart    # se quiser aceitar arquivos/Forms (opcional)
 
 # op EDA / gráficos
 matplotlib>=3.8,<4.0
