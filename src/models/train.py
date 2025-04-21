@@ -1,11 +1,3 @@
-"""
-train.py
-========
-Treina dois algoritmos, compara métricas e registra o melhor no MLflow Registry.
-Uso:
-    python src/models/train.py --data data/processed/train_processed.csv
-"""
-
 import argparse, os, joblib, mlflow, mlflow.sklearn, pandas as pd
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import (
@@ -44,8 +36,7 @@ def eval_metrics(y_true, y_pred, y_proba):
     }
 
 def main(data_path: str):
-    # ------------------------------------------------------------------ MLflow
-    mlflow.set_tracking_uri("mlruns")          # pasta local (SQLite nativo)
+    mlflow.set_tracking_uri("mlruns")
     mlflow.set_experiment(EXPERIMENT_NAME)
 
     X_train, X_test, y_train, y_test = load_data(data_path)
@@ -60,33 +51,29 @@ def main(data_path: str):
             metrics = eval_metrics(y_test, y_pred, y_prob)
             mlflow.log_metrics(metrics)
 
-            # Salva hiperparâmetros simples
             mlflow.log_params(model.get_params())
 
-            # Loga artefato + assinatura
             mlflow.sklearn.log_model(
                 model,
                 artifact_path="model",
                 registered_model_name="ChurnModel"
             )
 
-            # Mantém controle do melhor
             if metrics["roc_auc"] > best_auc:
                 best_auc, best_run_id = metrics["roc_auc"], run.info.run_id
 
-    # ------------------------------------------------------- promoção automática
     if best_run_id:
         client = mlflow.tracking.MlflowClient()
         mv = client.get_latest_versions(
             name="ChurnModel", stages=["None"]
-        )[0]   # mais recente sem estágio
+        )[0]
         client.transition_model_version_stage(
             name="ChurnModel",
             version=mv.version,
             stage="Staging",
             archive_existing_versions=True
         )
-        print(f"✔️  Versão {mv.version} promovida a STAGING (run {best_run_id})")
+        print(f"--Versão {mv.version} promovida a STAGING (run {best_run_id})")
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()

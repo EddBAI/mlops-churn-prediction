@@ -1,14 +1,3 @@
-"""
-make_dataset.py
----------------
-
-• Carrega CSV bruto
-• Aplica pré‑processamento
-• Salva:
-   - data/processed/train_processed.csv
-   - models/preprocess.pkl  (transformer serializado)
-"""
-
 import os, argparse, joblib, mlflow
 import pandas as pd
 from sklearn.compose import ColumnTransformer
@@ -19,7 +8,7 @@ from sklearn.model_selection import train_test_split
 
 RAW_PATH = "data/raw/WA_Fn-UseC-Telco-Customer-Churn.csv"
 PROCESSED_PATH  = "data/processed/train_processed.csv"
-PREPROCESS_PKL  = "models/preprocess.pkl"          # artefato
+PREPROCESS_PKL  = "models/preprocess.pkl"
 
 def load_raw(path: str) -> pd.DataFrame:
     return pd.read_csv(path)
@@ -27,7 +16,7 @@ def load_raw(path: str) -> pd.DataFrame:
 def build_transformer(df: pd.DataFrame) -> ColumnTransformer:
     numeric_cols   = df.select_dtypes(include=["int64", "float64"]).columns.tolist()
     categorical_cols = df.select_dtypes(include=["object", "category", "bool"]).columns.tolist()
-    # Remove label se houver
+
     if "Churn" in numeric_cols: numeric_cols.remove("Churn")
     if "Churn" in categorical_cols: categorical_cols.remove("Churn")
 
@@ -49,11 +38,13 @@ def build_transformer(df: pd.DataFrame) -> ColumnTransformer:
     return transformer
 
 def preprocess(df: pd.DataFrame) -> pd.DataFrame:
+    if "customerID" in df.columns:
+        df = df.drop(columns=["customerID"])
     y = df["Churn"].map({"Yes": 1, "No": 0})
     X = df.drop(columns=["Churn"])
     transformer = build_transformer(df)
     X_prep = transformer.fit_transform(X)
-    # Converter matriz numpy de volta para DataFrame com nomes significativos
+
     feature_names = (
         transformer.get_feature_names_out()
         if hasattr(transformer, "get_feature_names_out")
@@ -76,7 +67,6 @@ def main():
         df_proc, transf = preprocess(df_raw)
         save_outputs(df_proc, transf)
 
-        # Log artefatos no MLflow
         mlflow.log_artifact(PROCESSED_PATH, artifact_path="processed_data")
         mlflow.log_artifact(PREPROCESS_PKL, artifact_path="preprocess_model")
         mlflow.log_param("rows", len(df_raw))
