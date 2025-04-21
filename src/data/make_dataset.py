@@ -38,7 +38,7 @@ def build_transformer(df: pd.DataFrame) -> ColumnTransformer:
 
     cat_pipeline = Pipeline([
         ("imputer", SimpleImputer(strategy="most_frequent")),
-        ("onehot",  OneHotEncoder(handle_unknown="ignore", sparse=False))
+        ("onehot",  OneHotEncoder(handle_unknown="ignore", sparse_output=False))
     ])
 
     transformer = ColumnTransformer([
